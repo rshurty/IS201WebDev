@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f4f4f9; /* Light, soft background color */
+            color: #333; /* Dark gray text for better readability */
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding-top: 80px; /* make room for nav bar */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #d1e7dd; /* Soft light green */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            color: #333;
+            border: 2px solid #82c9b8; /* Soft green border */
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .cell:hover {
+            background-color: #a8d4c1; /* Lighter green on hover */
+        }
+
+        .game-info {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .game-buttons {
+            margin-top: 20px;
+        }
+
+        /* Navigation bar style */
+        .navbar {
+            background-color: #5f6368; /* Soft gray navbar */
+            padding: 10px;
+        }
+
+        .navbar-nav .nav-item .nav-link {
+            color: #f1f1f1 !important;
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-item .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .cell:disabled {
+            background-color: #e2e2e2;
+        }
+
+        /* Scoreboard style */
+        .scoreboard {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #ffffff; /* White background for the scoreboard */
+            border-radius: 20px;
+            width: 300px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .scoreboard p {
+            font-size: 22px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .scoreboard-title {
+            font-size: 20px;
+            color: #5f6368;
+            margin-right: 10px;
+        }
+
+        /* Reset button style */
+        .btn-danger {
+            background-color: #d9534f; /* Soft red for reset button */
+            border-color: #d9534f;
+        }
+
+        .btn-danger:hover {
+            background-color: #c9302c;
+            border-color: #c12e2a;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Tic-Tac-Toe</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Resume</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="scratch2.html">Space Exploration Page</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Tic-Tac-Toe</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Game Info -->
+    <div class="game-info">
+        <p id="turnMessage">Player X's turn</p>
+        <p id="gameStatus"></p>
+    </div>
+
+    <!-- Game Board -->
+    <div id="gameBoard">
+        <button class="cell" onclick="makeMove(0)"></button>
+        <button class="cell" onclick="makeMove(1)"></button>
+        <button class="cell" onclick="makeMove(2)"></button>
+        <button class="cell" onclick="makeMove(3)"></button>
+        <button class="cell" onclick="makeMove(4)"></button>
+        <button class="cell" onclick="makeMove(5)"></button>
+        <button class="cell" onclick="makeMove(6)"></button>
+        <button class="cell" onclick="makeMove(7)"></button>
+        <button class="cell" onclick="makeMove(8)"></button>
+    </div>
+
+    <!-- Reset Button -->
+    <div class="game-buttons">
+        <button id="resetButton" class="btn btn-danger" style="display: none;" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <!-- Scoreboard Box -->
+    <div class="scoreboard">
+        <div class="scoreboard-title">Scoreboard</div>
+        <p id="scoreboard">Player X: 0 | Player O: 0</p>
+    </div>
+
+    <script>
+        let board = ['', '', '', '', '', '', '', '', '']; // Array to track the board state
+        let currentPlayer = 'X'; // 'X' starts the game
+        let gameOver = false;
+        let scoreX = 0;
+        let scoreO = 0;
+
+        // Handle player's move
+        function makeMove(index) {
+            if (gameOver || board[index] !== '') return; // If game is over or cell is already filled, do nothing
+
+            board[index] = currentPlayer;
+            document.querySelectorAll('.cell')[index].textContent = currentPlayer;
+
+            if (checkWinner()) {
+                document.getElementById('gameStatus').textContent = `${currentPlayer} wins!`;
+                updateScore(currentPlayer);
+                gameOver = true;
+                document.getElementById('resetButton').style.display = 'inline-block'; // Show reset button
+            } else if (board.every(cell => cell !== '')) {
+                document.getElementById('gameStatus').textContent = 'It\'s a draw!';
+                gameOver = true;
+                document.getElementById('resetButton').style.display = 'inline-block'; // Show reset button
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                document.getElementById('turnMessage').textContent = `Player ${currentPlayer}'s turn`;
+            }
+        }
+
+        // Update scoreboard
+        function updateScore(winner) {
+            if (winner === 'X') {
+                scoreX++;
+            } else {
+                scoreO++;
+            }
+            document.getElementById('scoreboard').textContent = `Player X: ${scoreX} | Player O: ${scoreO}`;
+        }
+
+        // Check if there's a winner
+        function checkWinner() {
+            const winningCombinations = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            return winningCombinations.some(combination => {
+                const [a, b, c] = combination;
+                return board[a] !== '' && board[a] === board[b] && board[a] === board[c];
+            });
+        }
+
+        // Reset the game
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameOver = false;
+            document.getElementById('turnMessage').textContent = `Player X's turn`;
+            document.getElementById('gameStatus').textContent = '';
+            document.querySelectorAll('.cell').forEach(cell => cell.textContent = ''); // Clear the board
+            document.getElementById('resetButton').style.display = 'none'; // Hide reset button
+        }
+    </script>
+
+</body>
+</html>
